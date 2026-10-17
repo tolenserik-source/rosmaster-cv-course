@@ -1,0 +1,24 @@
+{
+  "source": "Original synthetic course assets, no third-party photographs",
+  "seed": 42,
+  "image_wh": [
+    800,
+    600
+  ],
+  "large_red_objects_in_scene": 2,
+  "small_red_specks": 2,
+  "plane_corners_normalized": [
+    0.18,
+    0.16,
+    0.8,
+    0.22,
+    0.9,
+    0.86,
+    0.12,
+    0.78
+  ],
+  "video_generated_this_run": true,
+  "video_frames": 60,
+  "video_fps": 15,
+  "note": "portrait_plane.png is a flat geometric target, not a human portrait."
+}
