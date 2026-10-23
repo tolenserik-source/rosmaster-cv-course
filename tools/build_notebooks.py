@@ -135,6 +135,13 @@ def check_chapter_links(chapter):
 
 
 def practice_cells(number):
+    if number == 1:
+        return [
+            markdown_cell("На общем ROSMASTER задайте своё имя папки в `STUDENT`. Ядро Jupyter должно работать на роботе: локальное ядро запускает код на ноутбуке. SSH и PowerShell из главы выполняются в терминалах. Учебные данные уже входят в курс.\n"),
+            code_cell('STUDENT = "ivanov"  # Замените на свою фамилию латиницей или номер команды.\nif not STUDENT or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for c in STUDENT):\n    raise ValueError("STUDENT: используйте строчные латинские буквы, цифры, _ или -.")\nOUT = "outputs/" + STUDENT + "/01"\n', ["parameters"]),
+            code_cell('run_module("lesson01_intro", "--input", "data/scene.png", "--out", OUT + "/baseline")\nrun_module("lesson01_intro", "--input", "data/scene.png", "--pixel", "160", "200", "--out", OUT + "/red")\nrun_module("lesson01_intro", "--input", "data/scene.png", "--pixel", "650", "420", "--out", OUT + "/blue")\n'),
+            code_cell(PREVIEW + '\nshow_results(OUT + "/baseline", limit=5)\nprint((ROOT / OUT / "red" / "report.json").read_text(encoding="utf-8"))\n'),
+        ]
     if number <= 5:
         stem = LESSONS[number - 1][0]
         input_name = "noisy.png" if number == 4 else "scene.png"
