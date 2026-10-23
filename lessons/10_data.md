@@ -1,5 +1,7 @@
 # 9.10. LaserScan, облако точек и преобразования координат
 
+**Работа на нашем роботе:** создайте [личную копию курса и выберите нужное окружение](../docs/SETUP_ROBOT.md). Все команды ниже выполняйте из её корня; результаты `outputs/` будут принадлежать вашей копии. Самостоятельный поиск камеры, контейнера и ROS-топиков разобран в той же инструкции.
+
 [Назад: 9.9](09_ros_processing.md) · [Оглавление](../README.md) · [Далее: 9.11](11_mediapipe.md)
 
 **Результат:** перевод лазерного скана в точки и растровый вид сверху; чтение облака из PCD или ROS; проверенное преобразование между системами координат. Первая часть полностью выполняется на ноутбуке. Для аппаратной части нужен работающий лидар или глубинная камера ROSMASTER. Ориентир: 90 минут.
@@ -11,7 +13,7 @@
 Запустите демонстрацию:
 
 ```bash
-python -m rosmaster_cv.lesson10_data --synthetic
+python3 -m rosmaster_cv.lesson10_data --synthetic
 ```
 
 Откройте `outputs/10/top_view.png` и `metadata.json`. Из 361 искусственного луча здесь остаются 349 допустимых точек. Искусственно пропущенные измерения демонстрируют фильтрацию. В `points.npy` находятся координаты Nx3. Это учебные числа, а не измерения робота.
@@ -19,7 +21,7 @@ python -m rosmaster_cv.lesson10_data --synthetic
 На растровом изображении положительная ось x направлена вверх, y — влево. Предел по каждой оси по умолчанию ±5 м. Сравните:
 
 ```bash
-python -m rosmaster_cv.lesson10_data --input-json outputs/10/synthetic_scan.json --extent 2 --output-dir outputs/10/cropped
+python3 -m rosmaster_cv.lesson10_data --input-json outputs/10/synthetic_scan.json --extent 2 --output-dir outputs/10/cropped
 ```
 
 Часть точек окажется вне картинки; поле `points_outside_raster` покажет их число. Исходные допустимые точки при этом остаются в NPY. Масштаб визуализации не изменяет измеренное расстояние.
@@ -29,7 +31,7 @@ python -m rosmaster_cv.lesson10_data --input-json outputs/10/synthetic_scan.json
 Первый запуск также создал `synthetic_cloud.pcd`: искусственную наклонную плоскость из 875 точек. Прочитайте её:
 
 ```bash
-python -m rosmaster_cv.lesson10_data --pcd outputs/10/synthetic_cloud.pcd --pcd-units m --output-dir outputs/10/cloud
+python3 -m rosmaster_cv.lesson10_data --pcd outputs/10/synthetic_cloud.pcd --pcd-units m --output-dir outputs/10/cloud
 ```
 
 Формат PCD содержит описание полей и их типы. Учебный парсер поддерживает `DATA ascii` и координаты x, y, z; бинарный PCD он отклоняет с ясным сообщением. Универсального поля единиц в PCD нет, поэтому для чужого файла сначала выясните единицы, затем подтверждайте `--pcd-units m`.
@@ -37,7 +39,7 @@ python -m rosmaster_cv.lesson10_data --pcd outputs/10/synthetic_cloud.pcd --pcd-
 Вид сверху отбрасывает высоту z. Посмотрите диапазоны координат:
 
 ```bash
-python -c "import numpy as np; p=np.load('outputs/10/cloud/points.npy', allow_pickle=False); print(p.min(axis=0)); print(p.max(axis=0))"
+python3 -c "import numpy as np; p=np.load('outputs/10/cloud/points.npy', allow_pickle=False); print(p.min(axis=0)); print(p.max(axis=0))"
 ```
 
 Объясните, какая информация видна в массиве, но исчезает на картинке. Одно облако точек и его проекция ещё не задают карту SLAM: для объединения разных наблюдений необходимы их положения и согласованные координаты.
@@ -49,7 +51,7 @@ python -c "import numpy as np; p=np.load('outputs/10/cloud/points.npy', allow_pi
 Для учебного поворота на 90° выполните:
 
 ```bash
-python -m rosmaster_cv.lesson10_data --input-json outputs/10/synthetic_scan.json --transform-json outputs/10/synthetic_rotation.json --output-dir outputs/10/rotated
+python3 -m rosmaster_cv.lesson10_data --input-json outputs/10/synthetic_scan.json --transform-json outputs/10/synthetic_rotation.json --output-dir outputs/10/rotated
 ```
 
 Сравните картинки и проверьте отдельную точку: при таком повороте `(1, 0, 0)` превращается в `(0, 1, 0)`. Эта матрица специально создана для искусственной сцены. Для настоящего робота берите преобразование из проверенной TF-цепочки или измеренной внешней калибровки. Расстояния между камерой и лидаром нельзя назначать по внешнему виду платформы. Скрипт проверяет имена систем и отклоняет масштабирование вместо жёсткого поворота.
